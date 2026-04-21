@@ -1,0 +1,40 @@
+[Unit]
+Description=AMRUT Peth Stall Booker — Spring Boot application
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=stallbooker
+Group=stallbooker
+WorkingDirectory=/opt/stall-booker
+
+# Environment file — keep secrets out of this unit file
+EnvironmentFile=/opt/stall-booker/.env
+
+ExecStart=/usr/bin/java \
+  -Xms256m \
+  -Xmx768m \
+  -XX:+UseG1GC \
+  -XX:MaxGCPauseMillis=200 \
+  -Dspring.profiles.active=prod \
+  -Dlogging.file.name=/var/log/stall-booker/application.log \
+  -jar /opt/stall-booker/stall-booker.jar
+
+SuccessExitStatus=143
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=15s
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/var/log/stall-booker /opt/stall-booker
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=stall-booker
+
+[Install]
+WantedBy=multi-user.target

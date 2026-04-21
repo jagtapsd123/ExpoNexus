@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 13% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 21 90% 48%;
+
+    --secondary: 27 96% 72%;
+    --secondary-foreground: 220 13% 18%;
+
+    --muted: 30 100% 95%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 30 100% 95%;
+    --accent-foreground: 220 13% 18%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 25 95% 53%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 13% 18%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 100% 95%;
+    --sidebar-accent-foreground: 220 13% 18%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 25 95% 53%;
+
+    --surface-peach: 30 100% 95%;
+
+    --stall-prime: 16 88% 40%;
+    --stall-prime-bg: 20 100% 94%;
+    --stall-super: 25 95% 53%;
+    --stall-super-bg: 33 100% 96%;
+    --stall-general: 142 71% 45%;
+    --stall-general-bg: 149 80% 95%;
+  }
+
+  .dark {
+    --background: 220 13% 18%;
+    --foreground: 0 0% 100%;
+    --card: 220 13% 22%;
+    --card-foreground: 0 0% 100%;
+    --popover: 220 13% 22%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 21 90% 48%;
+    --secondary: 27 96% 72%;
+    --secondary-foreground: 220 13% 18%;
+    --muted: 220 13% 26%;
+    --muted-foreground: 220 9% 65%;
+    --accent: 220 13% 26%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 30%;
+    --input: 220 13% 30%;
+    --ring: 25 95% 53%;
+    --sidebar-background: 220 13% 18%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 25 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 13% 26%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 13% 30%;
+    --sidebar-ring: 25 95% 53%;
+    --surface-peach: 220 13% 22%;
+
+    --stall-prime: 16 88% 40%;
+    --stall-prime-bg: 16 30% 20%;
+    --stall-super: 25 95% 53%;
+    --stall-super-bg: 25 30% 20%;
+    --stall-general: 142 71% 45%;
+    --stall-general-bg: 142 30% 18%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .surface-peach {
+    background-color: hsl(var(--surface-peach));
+  }
+}
