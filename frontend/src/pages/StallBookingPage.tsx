@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { api, ApiError } from "@/lib/apiClient";
 import { StallCanvas } from "@/components/ui/stall-canvas";
@@ -51,10 +52,16 @@ interface StallItem {
   category: string;
   price: number;
   status: string;
+  facilities: Array<{
+    id: number;
+    name: string;
+    icon: string;
+  }>;
 }
 
 interface CanvasStall extends StallMarker {
   realStallId?: number;
+  facilities?: StallItem["facilities"];
 }
 
 const toCategory = (value: string): "Prime" | "Super" | "General" => {
@@ -137,6 +144,7 @@ const StallBookingPage = () => {
             category: toCategory(realStall?.category ?? marker.category),
             price: realStall?.price ?? marker.price,
             status: toStatus(realStall?.status ?? marker.status),
+            facilities: realStall?.facilities ?? [],
             x: marker.x,
             y: marker.y,
             w: marker.w,
@@ -197,7 +205,7 @@ const StallBookingPage = () => {
           )
       );
 
-      toast.success(`Booking confirmed! ${selectedStalls.length} stall(s) at ${exhibition.name} for Rs. ${total.toLocaleString()}`);
+      toast.success(`Stall reserved! ${selectedStalls.length} stall(s) at ${exhibition.name} for Rs. ${total.toLocaleString()}`);
       setSelectedIds(new Set());
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Failed to confirm booking");
@@ -227,11 +235,20 @@ const StallBookingPage = () => {
           </Select>
 
           {exhibition && (
-            <div className="surface-peach rounded-lg p-4 mt-4">
+            <div className="surface-peach rounded-lg p-4 mt-4 space-y-3">
               <p className="text-sm text-muted-foreground">{exhibition.venue}</p>
-              <p className="text-sm text-muted-foreground">{exhibition.startDate} to {exhibition.endDate}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Start Date</Label>
+                  <Input value={exhibition.startDate} readOnly className="bg-muted cursor-not-allowed text-sm mt-1" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">End Date</Label>
+                  <Input value={exhibition.endDate} readOnly className="bg-muted cursor-not-allowed text-sm mt-1" />
+                </div>
+              </div>
               {layoutImage && (
-                <Button variant="outline" size="sm" className="mt-2" onClick={() => setLayoutOpen(true)}>
+                <Button variant="outline" size="sm" onClick={() => setLayoutOpen(true)}>
                   <Eye size={14} className="mr-1" /> View Full Layout
                 </Button>
               )}
@@ -251,16 +268,46 @@ const StallBookingPage = () => {
             />
 
             {selectedStalls.length > 0 && (
-              <div className="flex items-center justify-between mt-4 p-3 surface-peach rounded-lg">
-                <span className="text-sm">
-                  <span className="font-semibold">{selectedStalls.length}</span> stall(s) selected
-                </span>
-                <span className="text-sm font-bold text-primary">Rs. {total.toLocaleString()}</span>
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between rounded-lg p-3 surface-peach">
+                  <span className="text-sm">
+                    <span className="font-semibold">{selectedStalls.length}</span> stall(s) selected
+                  </span>
+                  <span className="text-sm font-bold text-primary">Rs. {total.toLocaleString()}</span>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {selectedStalls.map((stall) => (
+                    <div key={stall.id} className="rounded-lg border border-border bg-background p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">Stall {stall.number}</p>
+                          <p className="text-xs capitalize text-muted-foreground">{stall.category} category</p>
+                        </div>
+                        <span className="text-sm font-medium text-primary">Rs. {stall.price.toLocaleString()}</span>
+                      </div>
+                      <div className="mt-3">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Assigned facilities</p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {(stall.facilities ?? []).length > 0 ? (
+                            stall.facilities?.map((facility) => (
+                              <span key={facility.id} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-1 text-xs text-foreground">
+                                <span>{facility.icon}</span>
+                                <span>{facility.name}</span>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-muted-foreground">No facilities assigned to this stall yet.</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
             <Button onClick={() => void handleBook()} disabled={selectedStalls.length === 0} className="w-full mt-4">
-              Confirm Booking ({selectedStalls.length} stall{selectedStalls.length !== 1 ? "s" : ""})
+              Reserve Stall ({selectedStalls.length} stall{selectedStalls.length !== 1 ? "s" : ""})
             </Button>
           </div>
         )}

@@ -23,6 +23,7 @@ import MyBookingsPage from "./pages/MyBookingsPage";
 import InvoiceDetailPage from "./pages/InvoiceDetailPage";
 import StallManagementPage from "./pages/StallManagementPage";
 import StallLayoutManagementPage from "./pages/StallLayoutManagementPage";
+import ProductsPage from "./pages/ProductsPage";
 import LandingGalleryPage from "./pages/LandingGalleryPage";
 import LandingSettingsPage from "./pages/LandingSettingsPage";
 import LandingPage from "./pages/LandingPage";
@@ -54,6 +55,7 @@ const AppRoutes = () => {
         <Route path="/invoice/:bookingId" element={<InvoiceDetailPage />} />
           <Route path="/stall-management" element={<StallManagementPage />} />
           <Route path="/stall-layout" element={<StallLayoutManagementPage />} />
+          <Route path="/my-products" element={<ProductsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/landing-gallery" element={<LandingGalleryPage />} />
         <Route path="/landing-settings" element={<LandingSettingsPage />} />

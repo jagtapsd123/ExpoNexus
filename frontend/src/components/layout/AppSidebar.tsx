@@ -1,8 +1,8 @@
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Calendar, Ticket, FileText, Settings, Users, Package,
-  MessageSquare, ClipboardList, LogOut, ChevronLeft, ChevronRight, History, Image, SlidersHorizontal, Map
+  LayoutDashboard, Calendar, Ticket, FileText, Users, Package,
+  MessageSquare, ClipboardList, LogOut, ChevronLeft, ChevronRight, History, Image, SlidersHorizontal, Map, ShoppingBag
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ const navItems: NavItem[] = [
   { label: "Stall Booking", path: "/stall-booking", icon: Ticket, roles: ["exhibitor"] },
   { label: "Book Stall", path: "/book-stall", icon: Ticket, roles: ["exhibitor"] },
   { label: "My Bookings", path: "/my-bookings", icon: ClipboardList, roles: ["exhibitor"] },
+  { label: "My Products", path: "/my-products", icon: ShoppingBag, roles: ["exhibitor"] },
   { label: "Stall Management", path: "/stall-management", icon: Package, roles: ["admin", "organizer"] },
   { label: "Stall Layout Management", path: "/stall-layout", icon: Map, roles: ["admin"] },
   { label: "Invoices", path: "/invoices", icon: FileText, roles: ["admin"] },

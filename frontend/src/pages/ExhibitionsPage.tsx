@@ -26,6 +26,7 @@ interface PageResponse<T> {
 
 interface ExhibitionApi {
   id: number;
+  eventId?: string;
   name: string;
   startDate: string;
   endDate: string;
@@ -301,8 +302,13 @@ const ExhibitionsPage = () => {
         {visibleExhibitions.map((ex) => (
           <div key={ex.id} className="bg-card rounded-lg border border-border p-5 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-3">
-              <h3 className="text-base font-semibold text-foreground">{ex.name}</h3>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-foreground leading-tight">{ex.name}</h3>
+                {ex.eventId && (
+                  <span className="text-xs font-mono text-muted-foreground">{ex.eventId}</span>
+                )}
+              </div>
+              <span className={`ml-2 shrink-0 px-2 py-1 rounded text-xs font-medium ${
                 ex.status === "upcoming" ? "surface-peach text-foreground" :
                 ex.status === "ongoing" ? "bg-stall-general-bg text-stall-general" : "bg-muted text-muted-foreground"
               }`}>{ex.status}</span>

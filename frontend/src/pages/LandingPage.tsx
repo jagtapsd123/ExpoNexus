@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +5,6 @@ import { LoginSlideshow } from "@/components/LoginSlideshow";
 import { useLandingGallery } from "@/hooks/useLandingGallery";
 import { useLandingSettings } from "@/hooks/useLandingSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { AvailabilityModal } from "@/components/AvailabilityModal";
 import { motion } from "framer-motion";
 import logoIcon from "@/assets/amrut-logo.png";
 import {
@@ -40,7 +38,6 @@ const LandingPage = () => {
   const { images: galleryImages } = useLandingGallery();
   const { settings } = useLandingSettings();
   const { language, setLanguage, t } = useLanguage();
-  const [availabilityOpen, setAvailabilityOpen] = useState(false);
 
   const title = language === "mr" ? settings.title_mr : settings.title_en;
   const subtitle = language === "mr" ? settings.subtitle_mr : settings.subtitle_en;
@@ -160,8 +157,10 @@ const LandingPage = () => {
                 <p className="text-sm text-muted-foreground">{t("features.availability.desc")}</p>
               </div>
             </div>
-            <Button size="lg" onClick={() => setAvailabilityOpen(true)}>
-              {t("cta.checkAvailability")} <ArrowRight size={16} className="ml-1" />
+            <Button size="lg" asChild>
+              <Link to="/login?redirect=/book-stall">
+                {t("cta.checkAvailability")} <ArrowRight size={16} className="ml-1" />
+              </Link>
             </Button>
           </motion.div>
         </div>
@@ -285,7 +284,6 @@ const LandingPage = () => {
         </div>
       </footer>
 
-      <AvailabilityModal open={availabilityOpen} onOpenChange={setAvailabilityOpen} />
     </div>
   );
 };
