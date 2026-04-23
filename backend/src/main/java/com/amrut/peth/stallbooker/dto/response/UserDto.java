@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class UserDto {
 
     private Long id;
+    private String memberId;
     private String name;
     private String email;
     private String role;
@@ -23,6 +24,9 @@ public class UserDto {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getMemberId() { return memberId; }
+    public void setMemberId(String memberId) { this.memberId = memberId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -60,6 +64,7 @@ public class UserDto {
     public static UserDto from(User u) {
         UserDto dto = new UserDto();
         dto.id = u.getId();
+        dto.memberId = u.getMemberId();
         dto.name = u.getName();
         dto.email = u.getEmail();
         dto.role = u.getRole().name().toLowerCase();

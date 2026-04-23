@@ -10,9 +10,10 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users", indexes = {
-    @Index(name = "idx_users_email", columnList = "email", unique = true),
-    @Index(name = "idx_users_role", columnList = "role"),
-    @Index(name = "idx_users_status", columnList = "status")
+    @Index(name = "idx_users_email",     columnList = "email",     unique = true),
+    @Index(name = "idx_users_member_id", columnList = "member_id", unique = true),
+    @Index(name = "idx_users_role",      columnList = "role"),
+    @Index(name = "idx_users_status",    columnList = "status")
 })
 
 @NoArgsConstructor
@@ -42,6 +43,14 @@ public class User extends BaseEntity {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getMemberId() {
+		return memberId;
+	}
+
+	public void setMemberId(String memberId) {
+		this.memberId = memberId;
 	}
 
 	public String getPassword() {
@@ -173,6 +182,10 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 255)
     private String email;
+
+    /** Auto-generated on registration. Format: MEM0001, MEM0002 … Never changes after creation. */
+    @Column(name = "member_id", unique = true, nullable = false, length = 10)
+    private String memberId;
 
     @Column(name = "password_hash", nullable = false)
     private String password;

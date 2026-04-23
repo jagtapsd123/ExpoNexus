@@ -11,9 +11,11 @@ public class BookingDto {
     private Long id;
     private String bookingNumber;
     private Long exhibitorId;
+    private String memberId;
     private String exhibitorName;
     private String exhibitorEmail;
     private Long exhibitionId;
+    private String eventId;
     private String exhibitionName;
     private Long stallId;
     private String stallNumber;
@@ -45,6 +47,9 @@ public class BookingDto {
     public Long getExhibitorId() { return exhibitorId; }
     public void setExhibitorId(Long exhibitorId) { this.exhibitorId = exhibitorId; }
 
+    public String getMemberId() { return memberId; }
+    public void setMemberId(String memberId) { this.memberId = memberId; }
+
     public String getExhibitorName() { return exhibitorName; }
     public void setExhibitorName(String exhibitorName) { this.exhibitorName = exhibitorName; }
 
@@ -53,6 +58,9 @@ public class BookingDto {
 
     public Long getExhibitionId() { return exhibitionId; }
     public void setExhibitionId(Long exhibitionId) { this.exhibitionId = exhibitionId; }
+
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
 
     public String getExhibitionName() { return exhibitionName; }
     public void setExhibitionName(String exhibitionName) { this.exhibitionName = exhibitionName; }
@@ -113,9 +121,11 @@ public class BookingDto {
         dto.id = b.getId();
         dto.bookingNumber = b.getBookingNumber();
         dto.exhibitorId = b.getExhibitor().getId();
+        dto.memberId = b.getExhibitor().getMemberId();
         dto.exhibitorName = b.getExhibitor().getName();
         dto.exhibitorEmail = b.getExhibitor().getEmail();
         dto.exhibitionId = b.getExhibition().getId();
+        dto.eventId = b.getExhibition().getEventId();
         dto.exhibitionName = b.getExhibition().getName();
         dto.stallId = b.getStall().getId();
         dto.stallNumber = b.getStallNumber();

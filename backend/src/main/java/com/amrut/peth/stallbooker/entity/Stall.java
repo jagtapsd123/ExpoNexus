@@ -3,6 +3,9 @@ package com.amrut.peth.stallbooker.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "stalls", indexes = {
     @Index(name = "idx_stalls_exhibition", columnList = "exhibition_id"),
@@ -96,6 +99,14 @@ public class Stall extends BaseEntity {
 		this.bookedBy = bookedBy;
 	}
 
+	public Set<FacilityType> getFacilities() {
+		return facilities;
+	}
+
+	public void setFacilities(Set<FacilityType> facilities) {
+		this.facilities = facilities;
+	}
+
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -132,6 +143,15 @@ public class Stall extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booked_by_user_id")
     private User bookedBy;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "stall_facilities",
+        joinColumns = @JoinColumn(name = "stall_id"),
+        inverseJoinColumns = @JoinColumn(name = "facility_id")
+    )
+    @Builder.Default
+    private Set<FacilityType> facilities = new HashSet<>();
 
     public enum StallStatus {
         AVAILABLE, BOOKED, RESERVED, BLOCKED, UNAVAILABLE

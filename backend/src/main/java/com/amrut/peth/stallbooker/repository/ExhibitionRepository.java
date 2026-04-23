@@ -20,8 +20,10 @@ public interface ExhibitionRepository extends JpaRepository<Exhibition, Long> {
     @Query("""
         SELECT e FROM Exhibition e
         WHERE (:status IS NULL OR e.status = :status)
-          AND (:search IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(e.venue) LIKE LOWER(CONCAT('%', :search, '%')))
+          AND (:search IS NULL
+               OR LOWER(e.name)    LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(e.venue)   LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(e.eventId) LIKE LOWER(CONCAT('%', :search, '%')))
         ORDER BY e.startDate DESC
         """)
     Page<Exhibition> searchExhibitions(

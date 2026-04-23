@@ -25,14 +25,34 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsByStallIdAndStatusNot(Long stallId, Booking.BookingStatus status);
 
-    @Query("""
+    @Query(value = """
         SELECT b FROM Booking b
-        WHERE (:exhibitorId IS NULL OR b.exhibitor.id = :exhibitorId)
-          AND (:exhibitionId IS NULL OR b.exhibition.id = :exhibitionId)
+        JOIN FETCH b.exhibitor ex
+        JOIN FETCH b.exhibition ev
+        WHERE (:exhibitorId IS NULL OR ex.id = :exhibitorId)
+          AND (:exhibitionId IS NULL OR ev.id = :exhibitionId)
           AND (:status IS NULL OR b.status = :status)
-          AND (:search IS NULL OR LOWER(b.bookingNumber) LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(b.exhibitor.name) LIKE LOWER(CONCAT('%', :search, '%')))
+          AND (:search IS NULL
+               OR LOWER(b.bookingNumber)  LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ex.name)          LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ex.memberId)      LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ev.name)          LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ev.eventId)       LIKE LOWER(CONCAT('%', :search, '%')))
         ORDER BY b.createdAt DESC
+        """,
+        countQuery = """
+        SELECT COUNT(b) FROM Booking b
+        JOIN b.exhibitor ex
+        JOIN b.exhibition ev
+        WHERE (:exhibitorId IS NULL OR ex.id = :exhibitorId)
+          AND (:exhibitionId IS NULL OR ev.id = :exhibitionId)
+          AND (:status IS NULL OR b.status = :status)
+          AND (:search IS NULL
+               OR LOWER(b.bookingNumber)  LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ex.name)          LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ex.memberId)      LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ev.name)          LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(ev.eventId)       LIKE LOWER(CONCAT('%', :search, '%')))
         """)
     Page<Booking> searchBookings(
         @Param("exhibitorId") Long exhibitorId,
@@ -53,7 +73,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
         SELECT b FROM Booking b
-        WHERE b.exhibitor.id = :exhibitorId
+        JOIN FETCH b.exhibitor ex
+        JOIN FETCH b.exhibition ev
+        WHERE ex.id = :exhibitorId
           AND b.endDate >= :today
           AND b.status <> 'CANCELLED'
         ORDER BY b.startDate ASC
@@ -63,10 +85,30 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("""
         SELECT b FROM Booking b
-        WHERE b.exhibitor.id = :exhibitorId
+        JOIN FETCH b.exhibitor ex
+        JOIN FETCH b.exhibition ev
+        WHERE ex.id = :exhibitorId
           AND b.endDate < :today
         ORDER BY b.startDate DESC
         """)
     List<Booking> findPastByExhibitor(@Param("exhibitorId") Long exhibitorId,
                                       @Param("today") LocalDate today);
+
+    @Query("SELECT SUM(b.total) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.paymentStatus = 'PAID'")
+    Double sumTotalSalesByExhibitor(@Param("exhibitorId") Long exhibitorId);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.status = :status")
+    long countByExhibitorIdAndStatus(@Param("exhibitorId") Long exhibitorId,
+                                     @Param("status") Booking.BookingStatus status);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.endDate >= :today AND b.status <> 'CANCELLED'")
+    long countUpcomingByExhibitor(@Param("exhibitorId") Long exhibitorId,
+                                  @Param("today") LocalDate today);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.endDate < :today")
+    long countPastByExhibitor(@Param("exhibitorId") Long exhibitorId,
+                              @Param("today") LocalDate today);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.paymentStatus = 'REFUNDED'")
+    long countRefundsByExhibitor(@Param("exhibitorId") Long exhibitorId);
 }

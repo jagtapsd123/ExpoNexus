@@ -6,7 +6,6 @@ import com.amrut.peth.stallbooker.entity.*;
 import com.amrut.peth.stallbooker.exception.ResourceNotFoundException;
 import com.amrut.peth.stallbooker.repository.ExhibitionRepository;
 import com.amrut.peth.stallbooker.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,17 +16,19 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor
 public class ExhibitionService {
 
     private final ExhibitionRepository exhibitionRepository;
     private final UserRepository userRepository;
+    private final IdSequenceService idSequenceService;
 
-    public ExhibitionService(ExhibitionRepository exhibitionRepository, UserRepository userRepository) {
-		super();
-		this.exhibitionRepository = exhibitionRepository;
-		this.userRepository = userRepository;
-	}
+    public ExhibitionService(ExhibitionRepository exhibitionRepository,
+                             UserRepository userRepository,
+                             IdSequenceService idSequenceService) {
+        this.exhibitionRepository = exhibitionRepository;
+        this.userRepository = userRepository;
+        this.idSequenceService = idSequenceService;
+    }
 
 	@Transactional(readOnly = true)
     public Page<ExhibitionDto> searchExhibitions(Exhibition.Status status, String search, Pageable pageable) {
@@ -47,14 +48,14 @@ public class ExhibitionService {
 
     @Transactional
     public ExhibitionDto create(CreateExhibitionRequest req) {
-    	Exhibition exhibition = new Exhibition();
-
-    	exhibition.setName(req.getName());
-    	exhibition.setStartDate(req.getStartDate());
-    	exhibition.setEndDate(req.getEndDate());
-    	exhibition.setTime(req.getTime());
-    	exhibition.setVenue(req.getVenue());
-    	exhibition.setDescription(req.getDescription());
+        Exhibition exhibition = new Exhibition();
+        exhibition.setEventId(idSequenceService.nextEventId());
+        exhibition.setName(req.getName());
+        exhibition.setStartDate(req.getStartDate());
+        exhibition.setEndDate(req.getEndDate());
+        exhibition.setTime(req.getTime());
+        exhibition.setVenue(req.getVenue());
+        exhibition.setDescription(req.getDescription());
         exhibition.recalculateStatus();
 
         var cfg = req.getStallConfig();

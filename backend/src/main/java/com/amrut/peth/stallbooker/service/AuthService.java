@@ -1,7 +1,6 @@
 package com.amrut.peth.stallbooker.service;
 
 import com.amrut.peth.stallbooker.dto.request.LoginRequest;
-
 import com.amrut.peth.stallbooker.dto.request.RefreshTokenRequest;
 import com.amrut.peth.stallbooker.dto.request.RegisterRequest;
 import com.amrut.peth.stallbooker.dto.response.AuthResponse;
@@ -12,9 +11,6 @@ import com.amrut.peth.stallbooker.exception.ResourceNotFoundException;
 import com.amrut.peth.stallbooker.repository.UserRepository;
 import com.amrut.peth.stallbooker.security.JwtUtil;
 
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,25 +24,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Service
-@Builder
-
 public class AuthService {
-	
+
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final IdSequenceService idSequenceService;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-			AuthenticationManager authenticationManager) {
-		super();
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-		this.jwtUtil = jwtUtil;
-		this.authenticationManager = authenticationManager;
-		
-	}
+                       AuthenticationManager authenticationManager, IdSequenceService idSequenceService) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+        this.authenticationManager = authenticationManager;
+        this.idSequenceService = idSequenceService;
+    }
 
 	
     @Value("${app.security.max-failed-attempts:5}")
@@ -106,18 +100,17 @@ public class AuthService {
             ? User.Role.ORGANIZER : User.Role.EXHIBITOR;
 
         User user = new User();
+        user.setMemberId(idSequenceService.nextMemberId());
         user.setName(req.getName());
-        user.setMobile(req.getMobile());
-        user.setBusinessType(req.getBusinessType());
         user.setEmail(req.getEmail());
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setMobile(req.getMobile());
         user.setAddress(req.getAddress());
-        user .setRole(role);
-        user  .setStatus(User.Status.PENDING);
+        user.setRole(role);
+        user.setStatus(User.Status.PENDING);
         user.setBusinessName(req.getBusinessName());
         user.setBusinessType(req.getBusinessType());
-        user  .setDesignation(req.getDesignation());
+        user.setDesignation(req.getDesignation());
 
         userRepository.save(user);
         log.info("New user registered: {} ({})", user.getEmail(), user.getRole());

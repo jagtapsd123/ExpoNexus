@@ -3,6 +3,8 @@ package com.amrut.peth.stallbooker.dto.response;
 import com.amrut.peth.stallbooker.entity.Stall;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StallDto {
 
@@ -19,6 +21,7 @@ public class StallDto {
     private Long bookedByUserId;
     private String bookedByName;
     private LocalDateTime createdAt;
+    private List<FacilityTypeDto> facilities = new ArrayList<>();
 
     public StallDto() {}
 
@@ -61,6 +64,9 @@ public class StallDto {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+    public List<FacilityTypeDto> getFacilities() { return facilities; }
+    public void setFacilities(List<FacilityTypeDto> facilities) { this.facilities = facilities; }
+
     public static StallDto from(Stall s) {
         StallDto dto = new StallDto();
         dto.id = s.getId();
@@ -76,6 +82,9 @@ public class StallDto {
         dto.bookedByUserId = s.getBookedBy() != null ? s.getBookedBy().getId() : null;
         dto.bookedByName = s.getBookedBy() != null ? s.getBookedBy().getName() : null;
         dto.createdAt = s.getCreatedAt();
+        dto.facilities = s.getFacilities() != null
+            ? s.getFacilities().stream().map(FacilityTypeDto::from).toList()
+            : java.util.List.of();
         return dto;
     }
 }

@@ -2,6 +2,7 @@ package com.amrut.peth.stallbooker.repository;
 
 import com.amrut.peth.stallbooker.entity.Stall;
 import com.amrut.peth.stallbooker.entity.StallCategoryConfig;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,11 +16,17 @@ public interface StallRepository extends JpaRepository<Stall, Long> {
 
     List<Stall> findByExhibitionId(Long exhibitionId);
 
+    @EntityGraph(attributePaths = {"exhibition", "bookedBy", "facilities"})
+    List<Stall> findDetailedByExhibitionId(Long exhibitionId);
+
     List<Stall> findByExhibitionIdAndStatus(Long exhibitionId, Stall.StallStatus status);
 
     List<Stall> findByExhibitionIdAndCategory(Long exhibitionId, StallCategoryConfig.StallCategory category);
 
     Optional<Stall> findByExhibitionIdAndNumber(Long exhibitionId, String number);
+
+    @EntityGraph(attributePaths = {"exhibition", "bookedBy", "facilities"})
+    Optional<Stall> findDetailedById(Long id);
 
     boolean existsByExhibitionIdAndNumber(Long exhibitionId, String number);
 

@@ -10,6 +10,7 @@ import java.util.List;
 public class ExhibitionDto {
 
     private Long id;
+    private String eventId;
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -30,6 +31,9 @@ public class ExhibitionDto {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -79,6 +83,7 @@ public class ExhibitionDto {
     public static ExhibitionDto from(Exhibition e) {
         ExhibitionDto dto = new ExhibitionDto();
         dto.id = e.getId();
+        dto.eventId = e.getEventId();
         dto.name = e.getName();
         dto.startDate = e.getStartDate();
         dto.endDate = e.getEndDate();

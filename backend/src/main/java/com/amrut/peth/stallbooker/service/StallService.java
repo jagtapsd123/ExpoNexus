@@ -28,7 +28,7 @@ public class StallService {
 
 	@Transactional(readOnly = true)
     public List<StallDto> getByExhibition(Long exhibitionId) {
-        return stallRepository.findByExhibitionId(exhibitionId)
+        return stallRepository.findDetailedByExhibitionId(exhibitionId)
             .stream().map(StallDto::from).toList();
     }
 
@@ -86,7 +86,7 @@ public class StallService {
     }
 
     private Stall findOrThrow(Long id) {
-        return stallRepository.findById(id)
+        return stallRepository.findDetailedById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Stall", id));
     }
 }

@@ -11,9 +11,10 @@ import java.util.Set;
 
 @Entity
 @Table(name = "exhibitions", indexes = {
-    @Index(name = "idx_exhibitions_status", columnList = "status"),
+    @Index(name = "idx_exhibitions_status",     columnList = "status"),
     @Index(name = "idx_exhibitions_start_date", columnList = "start_date"),
-    @Index(name = "idx_exhibitions_end_date", columnList = "end_date")
+    @Index(name = "idx_exhibitions_end_date",   columnList = "end_date"),
+    @Index(name = "idx_exhibitions_event_id",   columnList = "event_id", unique = true)
 })
 @Getter
 @Setter
@@ -36,6 +37,14 @@ public class Exhibition extends BaseEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getEventId() {
+		return eventId;
+	}
+
+	public void setEventId(String eventId) {
+		this.eventId = eventId;
 	}
 
 	public LocalDate getStartDate() {
@@ -164,6 +173,10 @@ public class Exhibition extends BaseEntity {
 
     @Column(nullable = false, length = 300)
     private String name;
+
+    /** Auto-generated on creation. Format: EVT0001, EVT0002 … Never changes after creation. */
+    @Column(name = "event_id", unique = true, nullable = false, length = 10)
+    private String eventId;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
