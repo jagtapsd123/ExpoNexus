@@ -30,6 +30,9 @@ public class CreateExhibitionRequest {
     @Size(max = 2000)
     private String description;
 
+    @Size(max = 300)
+    private String organizerName;
+
     @NotNull(message = "Stall configuration is required")
     @Valid
     private StallConfig stallConfig;
@@ -141,6 +144,9 @@ public class CreateExhibitionRequest {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	public String getOrganizerName() { return organizerName; }
+	public void setOrganizerName(String organizerName) { this.organizerName = organizerName; }
 
 	public StallConfig getStallConfig() {
 		return stallConfig;

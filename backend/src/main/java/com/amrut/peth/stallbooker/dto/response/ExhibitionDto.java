@@ -20,6 +20,8 @@ public class ExhibitionDto {
     private int totalStalls;
     private String status;
     private String layoutImageUrl;
+    private String bannerImageUrl;
+    private String organizerName;
     private boolean showRevenueToExhibitors;
     private List<StallCategoryDto> stallCategories;
     private List<String> videoLinks;
@@ -62,6 +64,12 @@ public class ExhibitionDto {
     public String getLayoutImageUrl() { return layoutImageUrl; }
     public void setLayoutImageUrl(String layoutImageUrl) { this.layoutImageUrl = layoutImageUrl; }
 
+    public String getBannerImageUrl() { return bannerImageUrl; }
+    public void setBannerImageUrl(String bannerImageUrl) { this.bannerImageUrl = bannerImageUrl; }
+
+    public String getOrganizerName() { return organizerName; }
+    public void setOrganizerName(String organizerName) { this.organizerName = organizerName; }
+
     public boolean isShowRevenueToExhibitors() { return showRevenueToExhibitors; }
     public void setShowRevenueToExhibitors(boolean showRevenueToExhibitors) { this.showRevenueToExhibitors = showRevenueToExhibitors; }
 
@@ -93,6 +101,8 @@ public class ExhibitionDto {
         dto.totalStalls = e.getTotalStalls();
         dto.status = e.getStatus().name().toLowerCase();
         dto.layoutImageUrl = e.getLayoutImageUrl();
+        dto.bannerImageUrl = e.getBannerImageUrl();
+        dto.organizerName = e.getOrganizerName();
         dto.showRevenueToExhibitors = e.isShowRevenueToExhibitors();
         dto.stallCategories = e.getStallCategories().stream().map(StallCategoryDto::from).toList();
         dto.videoLinks = e.getVideoLinks();

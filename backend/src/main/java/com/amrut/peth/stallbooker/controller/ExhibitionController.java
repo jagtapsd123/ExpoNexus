@@ -93,6 +93,25 @@ public class ExhibitionController {
         return ResponseEntity.ok(ApiResponse.success("Layout image uploaded", url));
     }
 
+    @PostMapping("/{id}/banner-image")
+    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZER')")
+    @Operation(summary = "Upload or replace exhibition banner image")
+    public ResponseEntity<ApiResponse<ExhibitionDto>> uploadBannerImage(
+        @PathVariable Long id,
+        @RequestParam("file") MultipartFile file) {
+        String url = fileStorageService.uploadFile(file, "banners/" + id);
+        return ResponseEntity.ok(ApiResponse.success("Banner uploaded", exhibitionService.setBannerImage(id, url)));
+    }
+
+    @PatchMapping("/{id}/organizer-name")
+    @PreAuthorize("hasAnyRole('ADMIN','ORGANIZER')")
+    @Operation(summary = "Set organizer / contact name shown to exhibitors")
+    public ResponseEntity<ApiResponse<ExhibitionDto>> setOrganizerName(
+        @PathVariable Long id,
+        @RequestParam String name) {
+        return ResponseEntity.ok(ApiResponse.success("Organizer name updated", exhibitionService.setOrganizerName(id, name)));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete an exhibition")

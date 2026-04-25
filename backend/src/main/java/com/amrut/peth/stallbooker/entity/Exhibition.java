@@ -103,6 +103,22 @@ public class Exhibition extends BaseEntity {
 		this.layoutImageUrl = layoutImageUrl;
 	}
 
+	public String getBannerImageUrl() {
+		return bannerImageUrl;
+	}
+
+	public void setBannerImageUrl(String bannerImageUrl) {
+		this.bannerImageUrl = bannerImageUrl;
+	}
+
+	public String getOrganizerName() {
+		return organizerName;
+	}
+
+	public void setOrganizerName(String organizerName) {
+		this.organizerName = organizerName;
+	}
+
 	public boolean isShowRevenueToExhibitors() {
 		return showRevenueToExhibitors;
 	}
@@ -201,6 +217,12 @@ public class Exhibition extends BaseEntity {
 
     @Column(name = "layout_image_url", length = 1000)
     private String layoutImageUrl;
+
+    @Column(name = "banner_image_url", length = 1000)
+    private String bannerImageUrl;
+
+    @Column(name = "organizer_name", length = 300)
+    private String organizerName;
 
     @Column(name = "show_revenue_to_exhibitors")
     @Builder.Default

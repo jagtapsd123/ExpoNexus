@@ -68,8 +68,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT SUM(b.total) FROM Booking b WHERE b.paymentStatus = 'PAID'")
     Double sumTotalRevenue();
 
-    @Query("SELECT SUM(b.total) FROM Booking b WHERE b.exhibition.id = :exhibitionId AND b.paymentStatus = 'PAID'")
+    @Query("SELECT SUM(b.total) FROM Booking b WHERE b.exhibition.id = :exhibitionId AND b.status = 'CONFIRMED' AND b.paymentStatus = 'PAID'")
     Double sumRevenueByExhibition(@Param("exhibitionId") Long exhibitionId);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.exhibition.id = :exhibitionId AND b.status = :status")
+    long countByExhibitionIdAndStatus(@Param("exhibitionId") Long exhibitionId, @Param("status") Booking.BookingStatus status);
 
     @Query("""
         SELECT b FROM Booking b
@@ -94,7 +97,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findPastByExhibitor(@Param("exhibitorId") Long exhibitorId,
                                       @Param("today") LocalDate today);
 
-    @Query("SELECT SUM(b.total) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.paymentStatus = 'PAID'")
+    @Query("SELECT SUM(b.total) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.status = 'CONFIRMED' AND b.paymentStatus = 'PAID'")
     Double sumTotalSalesByExhibitor(@Param("exhibitorId") Long exhibitorId);
 
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.status = :status")
@@ -111,4 +114,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.paymentStatus = 'REFUNDED'")
     long countRefundsByExhibitor(@Param("exhibitorId") Long exhibitorId);
+
+    @Query("SELECT DISTINCT b.exhibition FROM Booking b WHERE b.exhibitor.id = :exhibitorId ORDER BY b.exhibition.startDate DESC")
+    java.util.List<com.amrut.peth.stallbooker.entity.Exhibition> findExhibitionsByExhibitorId(@Param("exhibitorId") Long exhibitorId);
+
+    @Query("SELECT SUM(b.total) FROM Booking b WHERE b.exhibitor.id = :exhibitorId AND b.exhibition.id = :exhibitionId AND b.status = 'CONFIRMED'")
+    Double sumTotalByExhibitorAndExhibition(@Param("exhibitorId") Long exhibitorId, @Param("exhibitionId") Long exhibitionId);
 }

@@ -1,7 +1,6 @@
 package com.amrut.peth.stallbooker.service;
 
 import com.amrut.peth.stallbooker.dto.request.CreateBookingRequest;
-
 import com.amrut.peth.stallbooker.dto.response.BookingDto;
 import com.amrut.peth.stallbooker.entity.*;
 import com.amrut.peth.stallbooker.exception.BadRequestException;
@@ -9,8 +8,6 @@ import com.amrut.peth.stallbooker.exception.ForbiddenException;
 import com.amrut.peth.stallbooker.exception.ResourceNotFoundException;
 import com.amrut.peth.stallbooker.repository.*;
 import com.amrut.peth.stallbooker.util.NumberGenerator;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -23,26 +20,29 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
-
 public class BookingService {
     private static final Logger log = LoggerFactory.getLogger(BookingService.class);
 
-    public BookingService(BookingRepository bookingRepository, ExhibitionRepository exhibitionRepository,
-			StallRepository stallRepository, StallCategoryConfigRepository stallCategoryConfigRepository,
-			NumberGenerator numberGenerator) {
-		super();
-		this.bookingRepository = bookingRepository;
-		this.exhibitionRepository = exhibitionRepository;
-		this.stallRepository = stallRepository;
-		this.stallCategoryConfigRepository = stallCategoryConfigRepository;
-		this.numberGenerator = numberGenerator;
-	}
-
-	private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
     private final ExhibitionRepository exhibitionRepository;
     private final StallRepository stallRepository;
     private final StallCategoryConfigRepository stallCategoryConfigRepository;
     private final NumberGenerator numberGenerator;
+    private final ExhibitorExpenseRepository expenseRepository;
+
+    public BookingService(BookingRepository bookingRepository,
+                          ExhibitionRepository exhibitionRepository,
+                          StallRepository stallRepository,
+                          StallCategoryConfigRepository stallCategoryConfigRepository,
+                          NumberGenerator numberGenerator,
+                          ExhibitorExpenseRepository expenseRepository) {
+        this.bookingRepository = bookingRepository;
+        this.exhibitionRepository = exhibitionRepository;
+        this.stallRepository = stallRepository;
+        this.stallCategoryConfigRepository = stallCategoryConfigRepository;
+        this.numberGenerator = numberGenerator;
+        this.expenseRepository = expenseRepository;
+    }
 
     private static final double GST_RATE = 0.18;
 
@@ -85,6 +85,20 @@ public class BookingService {
             throw new BadRequestException("Cannot book stalls for a completed exhibition");
         }
 
+        LocalDate exStart = exhibition.getStartDate();
+        LocalDate exEnd   = exhibition.getEndDate();
+        if (req.getStartDate().isBefore(exStart) || req.getStartDate().isAfter(exEnd)) {
+            throw new BadRequestException(
+                "Start date must be within the exhibition period (" + exStart + " to " + exEnd + ")");
+        }
+        if (req.getEndDate().isBefore(exStart) || req.getEndDate().isAfter(exEnd)) {
+            throw new BadRequestException(
+                "End date must be within the exhibition period (" + exStart + " to " + exEnd + ")");
+        }
+        if (req.getEndDate().isBefore(req.getStartDate())) {
+            throw new BadRequestException("End date cannot be before start date");
+        }
+
         Stall stall = stallRepository.findById(req.getStallId())
             .orElseThrow(() -> new ResourceNotFoundException("Stall", req.getStallId()));
 
@@ -114,7 +128,6 @@ public class BookingService {
         booking.setExhibitor(exhibitor);
         booking.setExhibition(exhibition);
         booking.setStall(stall);
-        booking.setProductCategory(stall.getCategory().name());
         booking.setStallNumber(stall.getNumber());
         booking.setBusinessName(req.getBusinessName());
         booking.setProductCategory(req.getProductCategory());
@@ -130,7 +143,6 @@ public class BookingService {
         booking.setStatus(Booking.BookingStatus.CONFIRMED);
         booking.setPaymentStatus(Booking.PaymentStatus.PAID);
         booking.setPaymentMethod(paymentMethod);
-            
 
         // Mark stall as booked
         stall.setStatus(Stall.StallStatus.BOOKED);
@@ -147,6 +159,18 @@ public class BookingService {
             });
 
         Booking saved = bookingRepository.save(booking);
+
+        // Auto-create a Stall Rent expense so it appears in the exhibitor's expense tab
+        ExhibitorExpense stallExpense = new ExhibitorExpense();
+        stallExpense.setExhibitor(exhibitor);
+        stallExpense.setExhibition(exhibition);
+        stallExpense.setType("Stall Rent");
+        stallExpense.setAmount(total);
+        stallExpense.setNote("Booking #" + saved.getBookingNumber() + " — Stall " + stall.getNumber());
+        stallExpense.setExpenseDate(req.getStartDate());
+        stallExpense.setBookingId(saved.getId());
+        expenseRepository.save(stallExpense);
+
         log.info("Booking created: {} for exhibitor {}", saved.getBookingNumber(), exhibitor.getEmail());
         return BookingDto.from(saved);
     }
@@ -157,7 +181,6 @@ public class BookingService {
         Booking.BookingStatus oldStatus = booking.getStatus();
         booking.setStatus(newStatus);
 
-        // If cancelling, free the stall
         if (newStatus == Booking.BookingStatus.CANCELLED && oldStatus != Booking.BookingStatus.CANCELLED) {
             Stall stall = booking.getStall();
             stall.setStatus(Stall.StallStatus.AVAILABLE);
@@ -172,6 +195,10 @@ public class BookingService {
                     c.setBooked(Math.max(0, c.getBooked() - 1));
                     stallCategoryConfigRepository.save(c);
                 });
+
+            // Remove the auto-generated Stall Rent expense
+            expenseRepository.findByBookingId(booking.getId())
+                .ifPresent(expenseRepository::delete);
         }
 
         return BookingDto.from(bookingRepository.save(booking));

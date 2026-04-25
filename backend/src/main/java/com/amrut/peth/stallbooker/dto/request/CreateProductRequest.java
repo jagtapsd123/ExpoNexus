@@ -16,7 +16,15 @@ public class CreateProductRequest {
     @Min(0)
     private double price;
 
-    private String stockStatus = "IN_STOCK";
+    @Min(0)
+    private double costPrice;
+
+    @Min(0)
+    private int quantity;
+
+    private String category;
+    private String sku;
+    private Long exhibitionId;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -27,6 +35,18 @@ public class CreateProductRequest {
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
 
-    public String getStockStatus() { return stockStatus; }
-    public void setStockStatus(String stockStatus) { this.stockStatus = stockStatus; }
+    public double getCostPrice() { return costPrice; }
+    public void setCostPrice(double costPrice) { this.costPrice = costPrice; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getSku() { return sku; }
+    public void setSku(String sku) { this.sku = sku; }
+
+    public Long getExhibitionId() { return exhibitionId; }
+    public void setExhibitionId(Long exhibitionId) { this.exhibitionId = exhibitionId; }
 }

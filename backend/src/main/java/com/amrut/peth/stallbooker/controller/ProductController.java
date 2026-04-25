@@ -56,19 +56,9 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success("Product updated", productService.update(id, req, current)));
     }
 
-    @PatchMapping("/{id}/stock")
-    @PreAuthorize("hasRole('EXHIBITOR')")
-    @Operation(summary = "Update stock status inline")
-    public ResponseEntity<ApiResponse<ProductDto>> updateStock(
-        @PathVariable Long id,
-        @RequestParam String status) {
-        User current = securityUtils.getCurrentUser();
-        return ResponseEntity.ok(ApiResponse.success("Stock updated", productService.updateStockStatus(id, status, current)));
-    }
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('EXHIBITOR')")
-    @Operation(summary = "Delete (soft-delete) a product")
+    @Operation(summary = "Soft-delete a product")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         User current = securityUtils.getCurrentUser();
         productService.delete(id, current);
