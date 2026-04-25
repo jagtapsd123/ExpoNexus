@@ -24,6 +24,10 @@ import InvoiceDetailPage from "./pages/InvoiceDetailPage";
 import StallManagementPage from "./pages/StallManagementPage";
 import StallLayoutManagementPage from "./pages/StallLayoutManagementPage";
 import ProductsPage from "./pages/ProductsPage";
+import SalesPage from "./pages/SalesPage";
+import ExpensesPage from "./pages/ExpensesPage";
+import BrowseExhibitionsPage from "./pages/BrowseExhibitionsPage";
+import ExhibitionDetailPage from "./pages/ExhibitionDetailPage";
 import LandingGalleryPage from "./pages/LandingGalleryPage";
 import LandingSettingsPage from "./pages/LandingSettingsPage";
 import LandingPage from "./pages/LandingPage";
@@ -53,9 +57,13 @@ const AppRoutes = () => {
         <Route path="/book-stall" element={<BookStallPage />} />
         <Route path="/my-bookings" element={<MyBookingsPage />} />
         <Route path="/invoice/:bookingId" element={<InvoiceDetailPage />} />
-          <Route path="/stall-management" element={<StallManagementPage />} />
-          <Route path="/stall-layout" element={<StallLayoutManagementPage />} />
-          <Route path="/my-products" element={<ProductsPage />} />
+        <Route path="/stall-management" element={<StallManagementPage />} />
+        <Route path="/stall-layout" element={<StallLayoutManagementPage />} />
+        <Route path="/my-products" element={<ProductsPage />} />
+        <Route path="/sales" element={<SalesPage />} />
+        <Route path="/expenses" element={<ExpensesPage />} />
+        <Route path="/browse-exhibitions" element={<BrowseExhibitionsPage />} />
+        <Route path="/exhibitions/:id" element={<ExhibitionDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/landing-gallery" element={<LandingGalleryPage />} />
         <Route path="/landing-settings" element={<LandingSettingsPage />} />
@@ -76,7 +84,7 @@ const App = () => (
       <Sonner />
       <LanguageProvider>
         <AuthProvider>
-          <BrowserRouter>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AppRoutes />
           </BrowserRouter>
         </AuthProvider>

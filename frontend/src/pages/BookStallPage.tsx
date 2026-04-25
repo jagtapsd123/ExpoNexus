@@ -716,13 +716,35 @@ const BookStallPage = () => {
                           <div className="grid grid-cols-2 gap-3">
                             <div>
                               <Label>Start Date</Label>
-                              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                              <Input
+                                type="date"
+                                value={startDate}
+                                min={exhibition?.startDate}
+                                max={exhibition?.endDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                              />
                             </div>
                             <div>
                               <Label>End Date</Label>
-                              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                              <Input
+                                type="date"
+                                value={endDate}
+                                min={startDate || exhibition?.startDate}
+                                max={exhibition?.endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                              />
                             </div>
                           </div>
+                          {exhibition?.startDate && (
+                            <p className="text-xs text-muted-foreground">
+                              Allowed range: {formatDate(exhibition.startDate)} – {formatDate(exhibition.endDate)}
+                            </p>
+                          )}
+                          {startDate && endDate && (new Date(startDate) < new Date(exhibition?.startDate ?? "") || new Date(endDate) > new Date(exhibition?.endDate ?? "")) && (
+                            <p className="text-xs text-red-500 font-medium">
+                              Dates must be within the exhibition period.
+                            </p>
+                          )}
                           {days > 0 && <p className="text-sm text-muted-foreground">{days} day(s) selected</p>}
                           <div>
                             <Label>Special Requirements (Optional)</Label>
@@ -778,7 +800,12 @@ const BookStallPage = () => {
                     </Button>
                     <Button
                       onClick={() => setStep(2)}
-                      disabled={!businessName || !productCategory || !startDate || !endDate}
+                      disabled={
+                        !businessName || !productCategory || !startDate || !endDate ||
+                        (exhibition?.startDate != null && new Date(startDate) < new Date(exhibition.startDate)) ||
+                        (exhibition?.endDate   != null && new Date(endDate)   > new Date(exhibition.endDate))   ||
+                        new Date(endDate) < new Date(startDate)
+                      }
                     >
                       Continue
                     </Button>

@@ -2,7 +2,7 @@ import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Calendar, Ticket, FileText, Users, Package,
-  MessageSquare, ClipboardList, LogOut, ChevronLeft, ChevronRight, History, Image, SlidersHorizontal, Map, ShoppingBag
+  MessageSquare, ClipboardList, LogOut, ChevronLeft, ChevronRight, History, Image, SlidersHorizontal, Map, ShoppingBag, ShoppingCart, Receipt
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -19,11 +19,13 @@ const navItems: NavItem[] = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard, roles: ["admin", "organizer", "exhibitor"] },
   { label: "Exhibitions", path: "/exhibitions", icon: Calendar, roles: ["admin", "organizer"] },
   { label: "Past Exhibitions", path: "/previous-exhibitions", icon: History, roles: ["admin", "organizer", "exhibitor"] },
-  { label: "Bookings", path: "/bookings", icon: Ticket, roles: ["admin", "exhibitor"] },
-  { label: "Stall Booking", path: "/stall-booking", icon: Ticket, roles: ["exhibitor"] },
+  { label: "Bookings", path: "/bookings", icon: Ticket, roles: ["admin"] },
   { label: "Book Stall", path: "/book-stall", icon: Ticket, roles: ["exhibitor"] },
   { label: "My Bookings", path: "/my-bookings", icon: ClipboardList, roles: ["exhibitor"] },
+  { label: "Browse Exhibitions", path: "/browse-exhibitions", icon: Calendar, roles: ["exhibitor"] },
   { label: "My Products", path: "/my-products", icon: ShoppingBag, roles: ["exhibitor"] },
+  { label: "Sales", path: "/sales", icon: ShoppingCart, roles: ["exhibitor"] },
+  { label: "Expenses", path: "/expenses", icon: Receipt, roles: ["exhibitor"] },
   { label: "Stall Management", path: "/stall-management", icon: Package, roles: ["admin", "organizer"] },
   { label: "Stall Layout Management", path: "/stall-layout", icon: Map, roles: ["admin"] },
   { label: "Invoices", path: "/invoices", icon: FileText, roles: ["admin"] },

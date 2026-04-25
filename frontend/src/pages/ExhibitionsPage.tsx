@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, MapPin, Clock, Eye, EyeOff } from "lucide-react";
+import { Plus, MapPin, Clock, Eye, EyeOff, Upload } from "lucide-react";
 import { CategoryLegend } from "@/components/ui/stall-category";
 import { LayoutUpload } from "@/components/ui/layout-upload";
 import { StallGrid } from "@/components/ui/stall-grid";
@@ -35,6 +35,8 @@ interface ExhibitionApi {
   totalStalls: number;
   status: "upcoming" | "ongoing" | "completed";
   layoutImageUrl?: string;
+  bannerImageUrl?: string;
+  organizerName?: string;
   showRevenueToExhibitors: boolean;
   stallCategories: Array<{
     category: string;
@@ -67,6 +69,8 @@ const emptyForm = {
   endDate: "",
   time: "",
   venue: "",
+  description: "",
+  organizerName: "",
   primeCount: "5",
   primePrice: "15000",
   superCount: "10",
@@ -174,6 +178,27 @@ const ExhibitionsPage = () => {
     [exList]
   );
 
+  const handleBannerUpload = async (exhibitionId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const token = localStorage.getItem("amrut_auth_token");
+      const response = await fetch(`${config.apiBaseUrl}/exhibitions/${exhibitionId}/banner-image`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: formData,
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(payload?.message || "Failed to upload banner");
+      if (payload?.data) {
+        setExList((prev) => prev.map((ex) => (ex.id === exhibitionId ? { ...ex, bannerImageUrl: payload.data } : ex)));
+        toast.success("Banner uploaded");
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload banner");
+    }
+  };
+
   const handleAdd = async () => {
     setIsSaving(true);
     try {
@@ -183,6 +208,8 @@ const ExhibitionsPage = () => {
         endDate: form.endDate,
         time: form.time,
         venue: form.venue,
+        description: form.description || undefined,
+        organizerName: form.organizerName || undefined,
         stallConfig: {
           primeCount: Number(form.primeCount),
           primePrice: Number(form.primePrice),
@@ -264,7 +291,18 @@ const ExhibitionsPage = () => {
                     <div><Label>End Date</Label><Input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} /></div>
                   </div>
                   <div><Label>Time</Label><Input value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} placeholder="10:00 AM - 8:00 PM" /></div>
-                  <div><Label>Venue</Label><Input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} /></div>
+                  <div><Label>Venue / Full Address</Label><Input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} placeholder="Hall name, City, State" /></div>
+                  <div><Label>Organizer / Contact Name</Label><Input value={form.organizerName} onChange={(e) => setForm({ ...form, organizerName: e.target.value })} placeholder="Organizer name shown to exhibitors" /></div>
+                  <div>
+                    <Label>Description</Label>
+                    <textarea
+                      className="w-full mt-1 rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                      rows={3}
+                      value={form.description}
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                      placeholder="Describe the exhibition, theme, expected visitors…"
+                    />
+                  </div>
                   <div className="border-t border-border pt-4">
                     <p className="text-sm font-semibold text-foreground mb-3">Stall Configuration</p>
                     {(["prime", "super", "general"] as const).map((cat) => (
@@ -364,6 +402,29 @@ const ExhibitionsPage = () => {
                 onDelete={() => undefined}
               />
             </div>
+
+            {canManageLayout && (
+              <div className="border-t border-border pt-3 mb-3">
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Banner Image</p>
+                {ex.bannerImageUrl && (
+                  <img src={ex.bannerImageUrl} alt="banner" className="h-16 w-full object-cover rounded mb-2 border border-border" />
+                )}
+                <label className="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <Upload size={13} />
+                  <span>{ex.bannerImageUrl ? "Replace banner" : "Upload banner image"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleBannerUpload(ex.id, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            )}
 
             <Button variant="outline" size="sm" onClick={() => setStallViewId(ex.id)}>
               View Stalls ({ex.totalStalls})

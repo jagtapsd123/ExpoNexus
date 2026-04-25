@@ -8,12 +8,20 @@ const categoryStyles: Record<StallCategoryType, { bg: string; text: string; bord
   General: { bg: "bg-stall-general-bg", text: "text-stall-general", border: "border-stall-general/30" },
 };
 
-export function CategoryBadge({ category, className }: { category: StallCategoryType; className?: string }) {
-  const s = categoryStyles[category];
+function normalizeCategory(category: string): StallCategoryType {
+  const value = category.trim().toLowerCase();
+  if (value === "prime") return "Prime";
+  if (value === "super") return "Super";
+  return "General";
+}
+
+export function CategoryBadge({ category, className }: { category: StallCategoryType | string; className?: string }) {
+  const normalized = normalizeCategory(category);
+  const s = categoryStyles[normalized];
   return (
     <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold", s.bg, s.text, s.border, className)}>
-      <span className={cn("h-1.5 w-1.5 rounded-full", category === "Prime" ? "bg-stall-prime" : category === "Super" ? "bg-stall-super" : "bg-stall-general")} />
-      {category}
+      <span className={cn("h-1.5 w-1.5 rounded-full", normalized === "Prime" ? "bg-stall-prime" : normalized === "Super" ? "bg-stall-super" : "bg-stall-general")} />
+      {normalized}
     </span>
   );
 }
@@ -31,8 +39,8 @@ export function CategoryLegend({ className }: { className?: string }) {
   );
 }
 
-export function CategoryCard({ category, children, className }: { category: StallCategoryType; children: React.ReactNode; className?: string }) {
-  const s = categoryStyles[category];
+export function CategoryCard({ category, children, className }: { category: StallCategoryType | string; children: React.ReactNode; className?: string }) {
+  const s = categoryStyles[normalizeCategory(category)];
   return (
     <div className={cn("rounded-lg border-l-[3px] bg-card p-3", s.border.replace("/30", ""), className)}>
       {children}
