@@ -25,6 +25,9 @@ public class UpdateProfileRequest {
     @Size(max = 100)
     private String designation;
 
+    @Size(max = 100)
+    private String district;
+
 	public String getName() {
 		return name;
 	}
@@ -72,6 +75,12 @@ public class UpdateProfileRequest {
 	public void setDesignation(String designation) {
 		this.designation = designation;
 	}
-    
-    
+
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
 }

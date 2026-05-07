@@ -2,7 +2,7 @@ import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Calendar, Ticket, FileText, Users, Package,
-  MessageSquare, ClipboardList, LogOut, ChevronLeft, ChevronRight, History, Image, SlidersHorizontal, Map, ShoppingBag, ShoppingCart, Receipt
+  MessageSquare, ClipboardList, LogOut, ChevronLeft, ChevronRight, History, Image, SlidersHorizontal, Map, ShoppingBag, ShoppingCart, Receipt, UserCheck
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,7 @@ const navItems: NavItem[] = [
   { label: "Facilities", path: "/facilities", icon: Package, roles: ["admin", "organizer", "exhibitor"] },
   { label: "Complaints", path: "/complaints", icon: MessageSquare, roles: ["admin", "organizer", "exhibitor"] },
   { label: "Users", path: "/users", icon: Users, roles: ["admin"] },
+  { label: "Beneficiaries", path: "/beneficiaries", icon: UserCheck, roles: ["admin", "organizer", "exhibitor"] },
   { label: "Landing Gallery", path: "/landing-gallery", icon: Image, roles: ["admin"] },
   { label: "Landing Settings", path: "/landing-settings", icon: SlidersHorizontal, roles: ["admin"] },
 ];

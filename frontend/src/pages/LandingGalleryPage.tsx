@@ -19,14 +19,10 @@ interface ApiResponse<T> {
 }
 
 interface GalleryImageItem {
-  id?: number;
+  id: number;
   url: string;
 }
 
-interface UploadResponse {
-  id?: number;
-  url?: string;
-}
 
 const LandingGalleryPage = () => {
   const { user } = useAuth();
@@ -40,9 +36,16 @@ const LandingGalleryPage = () => {
     const loadGallery = async () => {
       setError("");
       try {
-        const response = await api.get<ApiResponse<string[]>>("/landing/gallery");
+        // Backend returns either {id, url}[] (new) or string[] (old) — normalise both
+        const response = await api.get<ApiResponse<(GalleryImageItem | string)[]>>("/landing/gallery");
         if (!cancelled) {
-          setImages((response.data ?? []).map((url) => ({ url })));
+          const raw = response.data ?? [];
+          const items: GalleryImageItem[] = raw.map((item, i) =>
+            typeof item === "string"
+              ? { id: -(i + 1), url: item }   // negative id = legacy row (no server id)
+              : item
+          );
+          setImages(items);
         }
       } catch (err) {
         if (!cancelled) {
@@ -89,7 +92,8 @@ const LandingGalleryPage = () => {
         });
       }
 
-      setImages((prev) => [...uploadedItems.filter((item) => item.url), ...prev]);
+      const valid = uploadedItems.filter((item): item is GalleryImageItem => !!item.url && item.id > 0);
+      setImages((prev) => [...valid, ...prev]);
       toast.success(`${uploadedItems.length} image(s) uploaded to landing gallery`);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Failed to upload gallery image");
@@ -99,14 +103,13 @@ const LandingGalleryPage = () => {
   };
 
   const handleRemove = async (image: GalleryImageItem, index: number) => {
-    if (!image.id) {
-      toast.error("This image can be viewed, but delete is unavailable until the backend returns gallery IDs on list.");
+    if (image.id < 0) {
+      toast.error("Restart the backend and refresh the page to enable delete for previously-uploaded images.");
       return;
     }
-
     try {
       await api.delete<ApiResponse<void>>(`/landing/gallery/${image.id}`);
-      setImages((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
+      setImages((prev) => prev.filter((_, i) => i !== index));
       toast.success("Image removed");
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Failed to remove image");
@@ -162,9 +165,8 @@ const LandingGalleryPage = () => {
                     <Button
                       size="icon"
                       variant="destructive"
-                      disabled={!image.id}
                       onClick={() => void handleRemove(image, index)}
-                      title={image.id ? "Delete image" : "Delete unavailable for previously uploaded images"}
+                      title={image.id > 0 ? "Delete image" : "Restart backend to enable delete"}
                     >
                       <Trash2 size={16} />
                     </Button>

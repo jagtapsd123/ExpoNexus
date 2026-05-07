@@ -22,6 +22,7 @@ public class ExhibitionDto {
     private String layoutImageUrl;
     private String bannerImageUrl;
     private String organizerName;
+    private String district;
     private boolean showRevenueToExhibitors;
     private List<StallCategoryDto> stallCategories;
     private List<String> videoLinks;
@@ -70,6 +71,9 @@ public class ExhibitionDto {
     public String getOrganizerName() { return organizerName; }
     public void setOrganizerName(String organizerName) { this.organizerName = organizerName; }
 
+    public String getDistrict() { return district; }
+    public void setDistrict(String district) { this.district = district; }
+
     public boolean isShowRevenueToExhibitors() { return showRevenueToExhibitors; }
     public void setShowRevenueToExhibitors(boolean showRevenueToExhibitors) { this.showRevenueToExhibitors = showRevenueToExhibitors; }
 
@@ -103,6 +107,7 @@ public class ExhibitionDto {
         dto.layoutImageUrl = e.getLayoutImageUrl();
         dto.bannerImageUrl = e.getBannerImageUrl();
         dto.organizerName = e.getOrganizerName();
+        dto.district = e.getDistrict();
         dto.showRevenueToExhibitors = e.isShowRevenueToExhibitors();
         dto.stallCategories = e.getStallCategories().stream().map(StallCategoryDto::from).toList();
         dto.videoLinks = e.getVideoLinks();

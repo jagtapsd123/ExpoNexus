@@ -78,6 +78,14 @@ public class RegisterRequest {
 		this.designation = designation;
 	}
 
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+
 	@NotBlank(message = "Name is required")
     @Size(min = 2, max = 150, message = "Name must be 2-150 characters")
     private String name;
@@ -111,6 +119,9 @@ public class RegisterRequest {
     // Organizer fields
     @Size(max = 100, message = "Designation too long")
     private String designation;
+
+    @Size(max = 100, message = "District too long")
+    private String district;
 
     public enum RoleRequest {
         ORGANIZER, EXHIBITOR

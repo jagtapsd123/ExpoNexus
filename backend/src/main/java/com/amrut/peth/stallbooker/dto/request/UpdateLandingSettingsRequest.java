@@ -14,7 +14,8 @@ public class UpdateLandingSettingsRequest {
 
     private String phone;
 
-    @Email(message = "Invalid email format")
+    @Email(regexp = "^$|^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$",
+           message = "Invalid email format")
     private String email;
 
     @Size(max = 500) private String address;

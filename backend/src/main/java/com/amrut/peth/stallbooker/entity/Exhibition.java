@@ -119,6 +119,14 @@ public class Exhibition extends BaseEntity {
 		this.organizerName = organizerName;
 	}
 
+	public String getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(String district) {
+		this.district = district;
+	}
+
 	public boolean isShowRevenueToExhibitors() {
 		return showRevenueToExhibitors;
 	}
@@ -223,6 +231,9 @@ public class Exhibition extends BaseEntity {
 
     @Column(name = "organizer_name", length = 300)
     private String organizerName;
+
+    @Column(length = 100)
+    private String district;
 
     @Column(name = "show_revenue_to_exhibitors")
     @Builder.Default

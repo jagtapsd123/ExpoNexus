@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -79,6 +80,15 @@ public class LandingService {
         return galleryImageRepository
             .findByImageTypeOrderBySortOrderAsc(GalleryImage.ImageType.LANDING)
             .stream().map(GalleryImage::getImageUrl).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getGalleryItems() {
+        return galleryImageRepository
+            .findByImageTypeOrderBySortOrderAsc(GalleryImage.ImageType.LANDING)
+            .stream()
+            .map(img -> Map.<String, Object>of("id", img.getId(), "url", img.getImageUrl()))
+            .toList();
     }
 
     private LandingSettings getOrCreate() {

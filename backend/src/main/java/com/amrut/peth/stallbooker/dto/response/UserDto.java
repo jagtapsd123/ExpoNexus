@@ -18,6 +18,7 @@ public class UserDto {
     private String businessType;
     private String designation;
     private String profileImageUrl;
+    private String district;
     private LocalDateTime createdAt;
 
     public UserDto() {}
@@ -58,6 +59,9 @@ public class UserDto {
     public String getProfileImageUrl() { return profileImageUrl; }
     public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 
+    public String getDistrict() { return district; }
+    public void setDistrict(String district) { this.district = district; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -75,6 +79,7 @@ public class UserDto {
         dto.businessType = u.getBusinessType();
         dto.designation = u.getDesignation();
         dto.profileImageUrl = u.getProfileImageUrl();
+        dto.district = u.getDistrict();
         dto.createdAt = u.getCreatedAt();
         return dto;
     }

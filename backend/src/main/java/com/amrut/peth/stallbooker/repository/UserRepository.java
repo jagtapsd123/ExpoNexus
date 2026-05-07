@@ -27,10 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
         SELECT u FROM User u
         WHERE (:role IS NULL OR u.role = :role)
           AND (:status IS NULL OR u.status = :status)
-          AND (:search IS NULL
-               OR LOWER(u.name)     LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(u.email)    LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(u.memberId) LIKE LOWER(CONCAT('%', :search, '%')))
+          AND (cast(:search as string) IS NULL
+               OR LOWER(u.name)     LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(u.email)    LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(u.memberId) LIKE LOWER(CONCAT('%', cast(:search as string), '%')))
         """)
     Page<User> searchUsers(
         @Param("role") User.Role role,

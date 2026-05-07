@@ -111,6 +111,7 @@ public class AuthService {
         user.setBusinessName(req.getBusinessName());
         user.setBusinessType(req.getBusinessType());
         user.setDesignation(req.getDesignation());
+        user.setDistrict(req.getDistrict());
 
         userRepository.save(user);
         log.info("New user registered: {} ({})", user.getEmail(), user.getRole());

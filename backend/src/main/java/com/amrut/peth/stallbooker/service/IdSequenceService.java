@@ -43,8 +43,13 @@ public class IdSequenceService {
 
     private String next(String sequenceName, String prefix, int digits) {
         IdSequence seq = idSequenceRepository.findByNameWithLock(sequenceName)
-            .orElseThrow(() -> new IllegalStateException(
-                "ID sequence not found: " + sequenceName + ". Run the V2 migration."));
+            .orElseGet(() -> {
+                // Auto-create if missing (handles baseline-on-migrate skipping V2)
+                IdSequence newSeq = new IdSequence();
+                newSeq.setName(sequenceName);
+                newSeq.setNextVal(1L);
+                return idSequenceRepository.save(newSeq);
+            });
 
         long value = seq.getNextVal();
         seq.setNextVal(value + 1);

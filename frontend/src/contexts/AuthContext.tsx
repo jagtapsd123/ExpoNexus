@@ -34,6 +34,7 @@ export interface RegisterData {
   mobile: string;
   password: string;
   address: string;
+  district?: string;
   role: "exhibitor" | "organizer";
   businessName?: string;
   businessType?: string;
@@ -66,6 +67,15 @@ interface AuthApiPayload {
   accessToken?: string;
   refreshToken?: string;
   user?: AuthApiUser;
+}
+
+function getApiErrorMessage(error: ApiError) {
+  const data = error.data as { message?: string; errors?: Record<string, string> } | null;
+  if (data?.errors && typeof data.errors === "object") {
+    const messages = Object.values(data.errors).filter(Boolean);
+    if (messages.length > 0) return messages.join(", ");
+  }
+  return error.message;
 }
 
 const INITIAL_USERS: (User & { password: string })[] = [
@@ -155,6 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         mobile: data.mobile,
         password: data.password,
         address: data.address,
+        district: data.district,
         role: data.role.toUpperCase(),
         businessName: data.businessName,
         businessType: data.businessType,
@@ -164,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: response.success !== false };
     } catch (error) {
       if (error instanceof ApiError) {
-        return { success: false, reason: error.message };
+        return { success: false, reason: getApiErrorMessage(error) };
       }
       return { success: false, reason: "Registration failed" };
     }

@@ -1,6 +1,5 @@
 package com.amrut.peth.stallbooker.security;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,20 +20,19 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsServiceImpl userDetailsService,
-			CorsConfigurationSource corsConfigurationSource) {
-		super();
-		this.jwtAuthFilter = jwtAuthFilter;
-		this.userDetailsService = userDetailsService;
-		this.corsConfigurationSource = corsConfigurationSource;
-	}
-
-	private final JwtAuthFilter jwtAuthFilter;
+    private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsServiceImpl userDetailsService;
     private final CorsConfigurationSource corsConfigurationSource;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                          UserDetailsServiceImpl userDetailsService,
+                          CorsConfigurationSource corsConfigurationSource) {
+        this.jwtAuthFilter         = jwtAuthFilter;
+        this.userDetailsService    = userDetailsService;
+        this.corsConfigurationSource = corsConfigurationSource;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -61,38 +59,43 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/**", "/api/auth/refresh").permitAll()
+                // ── CORS preflight ────────────────────────────────────────────────
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // ── Fully public ─────────────────────────────────────────────────
+                .requestMatchers("/uploads/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/landing/**").permitAll()
-                // Swagger / Actuator
+                .requestMatchers(HttpMethod.GET, "/api/exhibitions", "/api/exhibitions/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/beneficiaries").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/districts").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                // Admin only
-                .requestMatchers("/api/users/**").hasRole("ADMIN")
-//               .requestMatchers(HttpMethod.POST, "/api/exhibitions").hasRole("ADMIN")
-//                .requestMatchers(HttpMethod.GET, "/api/exhibitions").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/exhibitions/**").hasRole("ADMIN")
-                .requestMatchers("/api/stall-layouts/**").hasAnyRole("ADMIN", "ORGANIZER", "EXHIBITOR")
-                .requestMatchers(HttpMethod.GET, "/api/stall-layouts/*").hasAnyRole("ADMIN", "ORGANIZER", "EXHIBITOR")
-                .requestMatchers("/api/landing/settings").hasRole("ADMIN")
-                .requestMatchers("/api/landing/gallery").hasRole("ADMIN")
-                .requestMatchers("/api/users/**").hasAuthority("ADMIN")
-                .requestMatchers("/api/users/**").hasAuthority("ADMIN")
-                
-                
-                // Admin + Organizer
-                .requestMatchers(HttpMethod.POST, "/api/exhibitions").hasAnyRole("ADMIN", "ORGANIZER")
-                .requestMatchers(HttpMethod.GET, "/api/exhibitions").hasAnyRole("ADMIN", "ORGANIZER", "EXHIBITOR") // later rule
-                .requestMatchers("/api/exhibitions/**").hasAnyRole("ADMIN", "ORGANIZER", "EXHIBITOR") // later rule
-                .requestMatchers(HttpMethod.GET, "/api/bookings").hasAnyRole("ADMIN", "ORGANIZER", "EXHIBITOR")
 
-               .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/status").hasAnyRole("ADMIN", "ORGANIZER")
+                // ── Admin only ───────────────────────────────────────────────────
+                .requestMatchers(HttpMethod.POST, "/api/beneficiaries/import").hasRole("ADMIN")
+                .requestMatchers("/api/beneficiaries/import").hasRole("ADMIN")
+                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/exhibitions/**").hasAnyRole("ADMIN", "ORGANIZER")
+                .requestMatchers(HttpMethod.GET, "/api/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/landing/settings", "/api/landing/gallery",
+                                 "/api/landing/hero-image").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/landing/settings", "/api/landing/gallery",
+                        "/api/landing/hero-image").hasRole("ADMIN")
+
+
+                // ── Admin + Organizer ────────────────────────────────────────────
+                .requestMatchers(HttpMethod.POST, "/api/exhibitions/**").hasAnyRole("ADMIN", "ORGANIZER")
+                .requestMatchers(HttpMethod.PUT,   "/api/exhibitions/**").hasAnyRole("ADMIN", "ORGANIZER")
+                .requestMatchers(HttpMethod.PATCH,  "/api/exhibitions/**").hasAnyRole("ADMIN", "ORGANIZER")
+                .requestMatchers(HttpMethod.PATCH, "/api/bookings/*/status").hasAnyRole("ADMIN", "ORGANIZER")
                 .requestMatchers(HttpMethod.PATCH, "/api/facilities/*/fulfill").hasAnyRole("ADMIN", "ORGANIZER")
                 .requestMatchers(HttpMethod.PATCH, "/api/complaints/*/status").hasAnyRole("ADMIN", "ORGANIZER")
-                // Everything else requires authentication
-                .requestMatchers("/api/bookings").hasRole("EXHIBITOR")
-                .requestMatchers(HttpMethod.GET, "/api/bookings").hasRole("EXHIBITOR")
 
+                // ── Stall layouts — all authenticated roles ──────────────────────
+                .requestMatchers("/api/stall-layouts/**").hasAnyRole("ADMIN", "ORGANIZER", "EXHIBITOR")
+
+                // ── Everything else requires authentication ──────────────────────
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

@@ -33,6 +33,9 @@ public class CreateExhibitionRequest {
     @Size(max = 300)
     private String organizerName;
 
+    @Size(max = 100)
+    private String district;
+
     @NotNull(message = "Stall configuration is required")
     @Valid
     private StallConfig stallConfig;
@@ -147,6 +150,9 @@ public class CreateExhibitionRequest {
 
 	public String getOrganizerName() { return organizerName; }
 	public void setOrganizerName(String organizerName) { this.organizerName = organizerName; }
+
+	public String getDistrict() { return district; }
+	public void setDistrict(String district) { this.district = district; }
 
 	public StallConfig getStallConfig() {
 		return stallConfig;

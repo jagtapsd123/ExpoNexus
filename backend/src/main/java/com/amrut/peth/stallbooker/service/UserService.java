@@ -56,6 +56,7 @@ public class UserService {
         if (req.getBusinessName() != null) user.setBusinessName(req.getBusinessName());
         if (req.getBusinessType() != null) user.setBusinessType(req.getBusinessType());
         if (req.getDesignation() != null) user.setDesignation(req.getDesignation());
+        if (req.getDistrict() != null)    user.setDistrict(req.getDistrict());
         return UserDto.from(userRepository.save(user));
     }
 

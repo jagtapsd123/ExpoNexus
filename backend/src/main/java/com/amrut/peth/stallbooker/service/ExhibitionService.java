@@ -1,6 +1,7 @@
 package com.amrut.peth.stallbooker.service;
 
 import com.amrut.peth.stallbooker.dto.request.CreateExhibitionRequest;
+import com.amrut.peth.stallbooker.dto.request.UpdateExhibitionRequest;
 import com.amrut.peth.stallbooker.dto.response.ExhibitionDto;
 import com.amrut.peth.stallbooker.entity.*;
 import com.amrut.peth.stallbooker.exception.ResourceNotFoundException;
@@ -34,8 +35,8 @@ public class ExhibitionService {
     }
 
 	@Transactional(readOnly = true)
-    public Page<ExhibitionDto> searchExhibitions(Exhibition.Status status, String search, Pageable pageable) {
-        return exhibitionRepository.searchExhibitions(status, search, pageable).map(ExhibitionDto::from);
+    public Page<ExhibitionDto> searchExhibitions(Exhibition.Status status, String search, String district, Pageable pageable) {
+        return exhibitionRepository.searchExhibitions(status, search, district, pageable).map(ExhibitionDto::from);
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +61,7 @@ public class ExhibitionService {
         exhibition.setVenue(req.getVenue());
         exhibition.setDescription(req.getDescription());
         exhibition.setOrganizerName(req.getOrganizerName());
+        exhibition.setDistrict(req.getDistrict());
         exhibition.recalculateStatus();
 
         var cfg = req.getStallConfig();
@@ -83,6 +85,21 @@ public class ExhibitionService {
         // Auto-create stall instances
         generateStalls(exhibition, cfg);
 
+        return ExhibitionDto.from(exhibitionRepository.save(exhibition));
+    }
+
+    @Transactional
+    public ExhibitionDto update(Long id, UpdateExhibitionRequest req) {
+        Exhibition exhibition = findOrThrow(id);
+        exhibition.setName(req.getName());
+        exhibition.setStartDate(req.getStartDate());
+        exhibition.setEndDate(req.getEndDate());
+        exhibition.setTime(req.getTime());
+        exhibition.setVenue(req.getVenue());
+        exhibition.setDescription(req.getDescription());
+        exhibition.setOrganizerName(req.getOrganizerName());
+        exhibition.setDistrict(req.getDistrict());
+        exhibition.recalculateStatus();
         return ExhibitionDto.from(exhibitionRepository.save(exhibition));
     }
 

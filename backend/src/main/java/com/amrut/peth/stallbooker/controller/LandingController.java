@@ -63,9 +63,9 @@ public class LandingController {
     }
 
     @GetMapping("/gallery")
-    @Operation(summary = "Get landing gallery image URLs (public)")
-    public ResponseEntity<ApiResponse<List<String>>> getGallery() {
-        return ResponseEntity.ok(ApiResponse.success(landingService.getGalleryUrls()));
+    @Operation(summary = "Get landing gallery images with IDs (public)")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getGallery() {
+        return ResponseEntity.ok(ApiResponse.success(landingService.getGalleryItems()));
     }
 
     @PostMapping(value = "/gallery", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

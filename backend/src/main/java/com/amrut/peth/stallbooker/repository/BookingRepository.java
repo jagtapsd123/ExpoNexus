@@ -32,12 +32,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         WHERE (:exhibitorId IS NULL OR ex.id = :exhibitorId)
           AND (:exhibitionId IS NULL OR ev.id = :exhibitionId)
           AND (:status IS NULL OR b.status = :status)
-          AND (:search IS NULL
-               OR LOWER(b.bookingNumber)  LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ex.name)          LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ex.memberId)      LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ev.name)          LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ev.eventId)       LIKE LOWER(CONCAT('%', :search, '%')))
+          AND (cast(:search as string) IS NULL
+               OR LOWER(b.bookingNumber)  LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ex.name)          LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ex.memberId)      LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ev.name)          LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ev.eventId)       LIKE LOWER(CONCAT('%', cast(:search as string), '%')))
         ORDER BY b.createdAt DESC
         """,
         countQuery = """
@@ -47,12 +47,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         WHERE (:exhibitorId IS NULL OR ex.id = :exhibitorId)
           AND (:exhibitionId IS NULL OR ev.id = :exhibitionId)
           AND (:status IS NULL OR b.status = :status)
-          AND (:search IS NULL
-               OR LOWER(b.bookingNumber)  LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ex.name)          LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ex.memberId)      LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ev.name)          LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(ev.eventId)       LIKE LOWER(CONCAT('%', :search, '%')))
+          AND (cast(:search as string) IS NULL
+               OR LOWER(b.bookingNumber)  LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ex.name)          LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ex.memberId)      LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ev.name)          LIKE LOWER(CONCAT('%', cast(:search as string), '%'))
+               OR LOWER(ev.eventId)       LIKE LOWER(CONCAT('%', cast(:search as string), '%')))
         """)
     Page<Booking> searchBookings(
         @Param("exhibitorId") Long exhibitorId,

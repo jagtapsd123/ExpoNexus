@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDistricts } from "@/hooks/useDistricts";
 import { toast } from "sonner";
 
 type RoleTab = "exhibitor" | "organizer";
@@ -12,11 +14,12 @@ type RoleTab = "exhibitor" | "organizer";
 const RegisterPage = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { districts } = useDistricts();
   const [tab, setTab] = useState<RoleTab>("exhibitor");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", mobile: "", password: "", address: "",
-    businessName: "", businessType: "", designation: "",
+    district: "", businessName: "", businessType: "", designation: "",
   });
   const [error, setError] = useState("");
 
@@ -40,7 +43,7 @@ const RegisterPage = () => {
 
     const data: RegisterData = {
       name: form.name, email: form.email, mobile: form.mobile,
-      password: form.password, address: form.address, role: tab,
+      password: form.password, address: form.address, district: form.district || undefined, role: tab,
       businessName: tab === "exhibitor" ? form.businessName : undefined,
       businessType: tab === "exhibitor" ? form.businessType : undefined,
       designation: tab === "organizer" ? form.designation : undefined,
@@ -96,6 +99,19 @@ const RegisterPage = () => {
             <div><Label>Mobile Number *</Label><Input value={form.mobile} onChange={(e) => set("mobile", e.target.value)} required /></div>
             <div><Label>Password *</Label><PasswordInput value={form.password} onChange={(e) => set("password", e.target.value)} required /></div>
             <div><Label>Address *</Label><Input value={form.address} onChange={(e) => set("address", e.target.value)} required /></div>
+            <div>
+              <Label>District</Label>
+              <Select value={form.district} onValueChange={(v) => set("district", v)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select district" />
+                </SelectTrigger>
+                <SelectContent>
+                  {districts.map((d) => (
+                    <SelectItem key={d.id} value={d.districtName}>{d.districtName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {tab === "exhibitor" && (
               <>

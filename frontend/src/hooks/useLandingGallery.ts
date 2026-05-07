@@ -7,6 +7,8 @@ interface ApiResponse<T> {
   data?: T;
 }
 
+interface GalleryItem { id: number; url: string; }
+
 export function useLandingGallery() {
   const [images, setImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,26 +19,19 @@ export function useLandingGallery() {
     const loadGallery = async () => {
       setIsLoading(true);
       try {
-        const response = await api.get<ApiResponse<string[]>>("/landing/gallery");
+        const response = await api.get<ApiResponse<GalleryItem[]>>("/landing/gallery");
         if (!cancelled) {
-          setImages(response.data ?? []);
+          setImages((response.data ?? []).map((item) => item.url));
         }
       } catch {
-        if (!cancelled) {
-          setImages([]);
-        }
+        if (!cancelled) setImages([]);
       } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     void loadGallery();
-
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   return { images, setImages, isLoading };

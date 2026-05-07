@@ -31,6 +31,7 @@ import ExhibitionDetailPage from "./pages/ExhibitionDetailPage";
 import LandingGalleryPage from "./pages/LandingGalleryPage";
 import LandingSettingsPage from "./pages/LandingSettingsPage";
 import LandingPage from "./pages/LandingPage";
+import BeneficiariesPage from "./pages/BeneficiariesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ const AppRoutes = () => {
         <Route path="/facilities" element={<FacilitiesPage />} />
         <Route path="/complaints" element={<ComplaintsPage />} />
         <Route path="/users" element={<UsersPage />} />
+        <Route path="/beneficiaries" element={<BeneficiariesPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

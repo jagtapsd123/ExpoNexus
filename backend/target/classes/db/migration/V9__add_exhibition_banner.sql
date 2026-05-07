@@ -1,6 +1,6 @@
 -- ============================================================
 -- V9__add_exhibition_banner.sql
--- Add banner image URL to exhibitions
+-- PostgreSQL
 -- ============================================================
 
 ALTER TABLE exhibitions

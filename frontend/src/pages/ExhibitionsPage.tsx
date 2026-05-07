@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, MapPin, Clock, Eye, EyeOff, Upload } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, MapPin, Clock, Eye, EyeOff, Upload, Pencil, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDistricts } from "@/hooks/useDistricts";
 import { CategoryLegend } from "@/components/ui/stall-category";
 import { LayoutUpload } from "@/components/ui/layout-upload";
 import { StallGrid } from "@/components/ui/stall-grid";
@@ -32,11 +34,13 @@ interface ExhibitionApi {
   endDate: string;
   time?: string;
   venue: string;
+  description?: string;
   totalStalls: number;
   status: "upcoming" | "ongoing" | "completed";
   layoutImageUrl?: string;
   bannerImageUrl?: string;
   organizerName?: string;
+  district?: string;
   showRevenueToExhibitors: boolean;
   stallCategories: Array<{
     category: string;
@@ -69,6 +73,7 @@ const emptyForm = {
   endDate: "",
   time: "",
   venue: "",
+  district: "",
   description: "",
   organizerName: "",
   primeCount: "5",
@@ -105,7 +110,9 @@ const ExhibitionsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState(emptyForm);
+  const [editingExhibition, setEditingExhibition] = useState<ExhibitionApi | null>(null);
 
+  const { districts } = useDistricts();
   const isAdmin = user?.role === "admin";
   const canManageLayout = isAdmin || user?.role === "organizer";
 
@@ -178,6 +185,28 @@ const ExhibitionsPage = () => {
     [exList]
   );
 
+  const openCreateDialog = () => {
+    setEditingExhibition(null);
+    setForm(emptyForm);
+    setOpen(true);
+  };
+
+  const openEditDialog = (exhibition: ExhibitionApi) => {
+    setEditingExhibition(exhibition);
+    setForm({
+      ...emptyForm,
+      name: exhibition.name,
+      startDate: exhibition.startDate,
+      endDate: exhibition.endDate,
+      time: exhibition.time ?? "",
+      venue: exhibition.venue,
+      district: exhibition.district ?? "",
+      description: exhibition.description ?? "",
+      organizerName: exhibition.organizerName ?? "",
+    });
+    setOpen(true);
+  };
+
   const handleBannerUpload = async (exhibitionId: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -199,17 +228,24 @@ const ExhibitionsPage = () => {
     }
   };
 
-  const handleAdd = async () => {
+  const handleSave = async () => {
     setIsSaving(true);
     try {
-      const response = await api.post<ApiResponse<ExhibitionApi>>("/exhibitions", {
+      const payload = {
         name: form.name,
         startDate: form.startDate,
         endDate: form.endDate,
         time: form.time,
         venue: form.venue,
+        district: form.district || undefined,
         description: form.description || undefined,
         organizerName: form.organizerName || undefined,
+      };
+
+      const response = editingExhibition
+        ? await api.put<ApiResponse<ExhibitionApi>>(`/exhibitions/${editingExhibition.id}`, payload)
+        : await api.post<ApiResponse<ExhibitionApi>>("/exhibitions", {
+        ...payload,
         stallConfig: {
           primeCount: Number(form.primeCount),
           primePrice: Number(form.primePrice),
@@ -221,16 +257,30 @@ const ExhibitionsPage = () => {
       });
 
       if (response.data) {
-        setExList((prev) => [response.data!, ...prev]);
+        setExList((prev) => editingExhibition
+          ? prev.map((ex) => (ex.id === editingExhibition.id ? response.data! : ex))
+          : [response.data!, ...prev]);
       }
 
       setOpen(false);
       setForm(emptyForm);
-      toast.success(response.message || "Exhibition created");
+      setEditingExhibition(null);
+      toast.success(response.message || (editingExhibition ? "Exhibition updated" : "Exhibition created"));
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Failed to create exhibition");
+      toast.error(err instanceof ApiError ? err.message : "Failed to save exhibition");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (exhibition: ExhibitionApi) => {
+    if (!window.confirm(`Delete exhibition "${exhibition.name}"?`)) return;
+    try {
+      await api.delete<ApiResponse<void>>(`/exhibitions/${exhibition.id}`);
+      setExList((prev) => prev.filter((ex) => ex.id !== exhibition.id));
+      toast.success("Exhibition deleted");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Failed to delete exhibition");
     }
   };
 
@@ -278,12 +328,13 @@ const ExhibitionsPage = () => {
         description="Manage all exhibitions and stall configurations"
         actions={
           canManageLayout ? (
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button><Plus size={16} className="mr-1" /> Add Exhibition</Button>
-              </DialogTrigger>
+            <Dialog open={open} onOpenChange={(nextOpen) => {
+              setOpen(nextOpen);
+              if (!nextOpen) setEditingExhibition(null);
+            }}>
+              <Button onClick={openCreateDialog}><Plus size={16} className="mr-1" /> Add Exhibition</Button>
               <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                <DialogHeader><DialogTitle>Create Exhibition</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>{editingExhibition ? "Edit Exhibition" : "Create Exhibition"}</DialogTitle></DialogHeader>
                 <div className="space-y-4 mt-4">
                   <div><Label>Exhibition Name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
                   <div className="grid grid-cols-2 gap-3">
@@ -292,6 +343,19 @@ const ExhibitionsPage = () => {
                   </div>
                   <div><Label>Time</Label><Input value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} placeholder="10:00 AM - 8:00 PM" /></div>
                   <div><Label>Venue / Full Address</Label><Input value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} placeholder="Hall name, City, State" /></div>
+                  <div>
+                    <Label>District</Label>
+                    <Select value={form.district} onValueChange={(v) => setForm({ ...form, district: v })}>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Select district" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {districts.map((d) => (
+                          <SelectItem key={d.id} value={d.districtName}>{d.districtName}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div><Label>Organizer / Contact Name</Label><Input value={form.organizerName} onChange={(e) => setForm({ ...form, organizerName: e.target.value })} placeholder="Organizer name shown to exhibitors" /></div>
                   <div>
                     <Label>Description</Label>
@@ -303,17 +367,19 @@ const ExhibitionsPage = () => {
                       placeholder="Describe the exhibition, theme, expected visitors…"
                     />
                   </div>
-                  <div className="border-t border-border pt-4">
-                    <p className="text-sm font-semibold text-foreground mb-3">Stall Configuration</p>
-                    {(["prime", "super", "general"] as const).map((cat) => (
-                      <div key={cat} className="grid grid-cols-2 gap-3 mb-3">
-                        <div><Label>{cat.charAt(0).toUpperCase() + cat.slice(1)} Count</Label><Input type="number" value={form[`${cat}Count` as keyof typeof form]} onChange={(e) => setForm({ ...form, [`${cat}Count`]: e.target.value })} /></div>
-                        <div><Label>{cat.charAt(0).toUpperCase() + cat.slice(1)} Price (Rs.)</Label><Input type="number" value={form[`${cat}Price` as keyof typeof form]} onChange={(e) => setForm({ ...form, [`${cat}Price`]: e.target.value })} /></div>
-                      </div>
-                    ))}
-                  </div>
-                  <Button onClick={() => void handleAdd()} className="w-full" disabled={isSaving}>
-                    {isSaving ? "Creating..." : "Create Exhibition"}
+                  {!editingExhibition && (
+                    <div className="border-t border-border pt-4">
+                      <p className="text-sm font-semibold text-foreground mb-3">Stall Configuration</p>
+                      {(["prime", "super", "general"] as const).map((cat) => (
+                        <div key={cat} className="grid grid-cols-2 gap-3 mb-3">
+                          <div><Label>{cat.charAt(0).toUpperCase() + cat.slice(1)} Count</Label><Input type="number" value={form[`${cat}Count` as keyof typeof form]} onChange={(e) => setForm({ ...form, [`${cat}Count`]: e.target.value })} /></div>
+                          <div><Label>{cat.charAt(0).toUpperCase() + cat.slice(1)} Price (Rs.)</Label><Input type="number" value={form[`${cat}Price` as keyof typeof form]} onChange={(e) => setForm({ ...form, [`${cat}Price`]: e.target.value })} /></div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <Button onClick={() => void handleSave()} className="w-full" disabled={isSaving}>
+                    {isSaving ? "Saving..." : editingExhibition ? "Update Exhibition" : "Create Exhibition"}
                   </Button>
                 </div>
               </DialogContent>
@@ -346,15 +412,27 @@ const ExhibitionsPage = () => {
                   <span className="text-xs font-mono text-muted-foreground">{ex.eventId}</span>
                 )}
               </div>
-              <span className={`ml-2 shrink-0 px-2 py-1 rounded text-xs font-medium ${
-                ex.status === "upcoming" ? "surface-peach text-foreground" :
-                ex.status === "ongoing" ? "bg-stall-general-bg text-stall-general" : "bg-muted text-muted-foreground"
-              }`}>{ex.status}</span>
+              <div className="ml-2 shrink-0 flex items-center gap-1">
+                {canManageLayout && (
+                  <>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(ex)} title="Edit exhibition">
+                      <Pencil size={14} />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => void handleDelete(ex)} title="Delete exhibition">
+                      <Trash2 size={14} />
+                    </Button>
+                  </>
+                )}
+                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                  ex.status === "upcoming" ? "surface-peach text-foreground" :
+                  ex.status === "ongoing" ? "bg-stall-general-bg text-stall-general" : "bg-muted text-muted-foreground"
+                }`}>{ex.status}</span>
+              </div>
             </div>
 
             <div className="space-y-1 text-sm text-muted-foreground mb-4">
               <p className="flex items-center gap-1"><Clock size={14} /> {ex.startDate} to {ex.endDate}{ex.time ? ` · ${ex.time}` : ""}</p>
-              <p className="flex items-center gap-1"><MapPin size={14} /> {ex.venue}</p>
+              <p className="flex items-center gap-1"><MapPin size={14} /> {ex.venue}{ex.district ? ` · ${ex.district}` : ""}</p>
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-4">
